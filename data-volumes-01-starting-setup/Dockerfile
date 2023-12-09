@@ -1,15 +1,15 @@
-FROM node:14
+FROM node
 
 WORKDIR /app
 
-COPY package.json .
+COPY  package.json /app
 
 RUN npm install
 
 COPY . .
 
-EXPOSE 80
+ENV PORT 80
 
-# VOLUME [ "/app/feedback" ]
+EXPOSE $PORT
 
-CMD [ "npm", "start" ]
+CMD [ "node", "server.js" ]
