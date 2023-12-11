@@ -1,0 +1,48 @@
+version: "3.8"
+
+# docker-compose는 디폴트 네트워크를 만들어 그 네트워크에 모든 컨테이너를 추가해준다. (네트워크 설정이 따로 필요하지 않음)
+services:
+  mongodb:
+    image: "mongo"
+    volumes:
+      - data:/data/db # 명명된 볼륨
+    # container_name: mongodb # 컨테이너 이름 설정
+    # environment:
+    # - MONGO_INITDB_ROOT_USERNAME: root
+    # - MONGO_INITDB_ROOT_PASSWORD: root
+    env_file:
+      - ./env/mongo.env
+    # networks:
+    #   - goals-net
+
+  backend:
+    build: ./backend
+    # build:
+    #   context: ./backend
+    #   dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    volumes:
+      - logs:/app/logs # 명명된 볼륨
+      - /app/node_modules # 익명의 봉륨
+      - ./backend:/app # 바인드 마운트
+    env_file:
+      - ./env/backend.env
+    depends_on: # depends_on 명령은 서비스간의 종속성 순서대로 서비스를 시작할 수 있다.
+      - mongodb # mongodb 서비스(컨테이너) 실행 후 실행을 해야한다는 설정이다.
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/src:/app/src
+    stdin_open: true
+    tty: true
+    depends_on:
+      - backend
+
+  # 명명된 볼륨 설정 (익명 볼륨과 바인드 마운트는 해당 안됨)
+volumes:
+  data:
+  logs:
